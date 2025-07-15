@@ -26,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
         _user = loggedUser;
 
         // Imprime el rol y nombre del usuario
+        // ignore: avoid_print
         print('🔷 Usuario logueado como rol: ${_user!.rol}, nombre: ${_user!.nombre ?? ''}');
 
       } else {

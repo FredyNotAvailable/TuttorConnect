@@ -1,18 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tutor_connect/providers/matricula_provider.dart';
+import 'package:tutor_connect/providers/usuario_provider.dart';
 
 import '../models/usuario.dart';
 import '../providers/auth_provider.dart';
 import '../app_routes.dart';
 import '../models/rol.dart';
 
-import '../widgets/home_docente_widget.dart';
-import '../widgets/home_estudiante_widget.dart';
+import '../widgets/docentes/home_docente_widget.dart';
+import '../widgets/estudiantes/home_estudiante_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
 
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _cargado = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_cargado) {
+      final user = context.read<AuthProvider>().user;
+      if (user != null) {
+        context.read<UsuarioProvider>().cargarUsuario(user.id);
+        context.read<MatriculaProvider>().cargarMatricula(user.id);
+        // context.read<CarreraProvider>().cargarCarrera();
+      }
+      _cargado = true;
+    }
+  }
 
   void _logout(BuildContext context) {
     context.read<AuthProvider>().logout();
@@ -29,6 +53,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final Usuario? user = context.watch<AuthProvider>().user;
 
     if (user == null) {

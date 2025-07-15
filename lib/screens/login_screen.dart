@@ -6,7 +6,7 @@ import '../app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     authProvider.login(_email, _password).then((_) {
       final Usuario? user = authProvider.user;
       if (user != null) {
+        // ignore: avoid_print
         print('Login: Usuario con rol ${user.rol} - ${user.nombre ?? ''}');
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       } else {

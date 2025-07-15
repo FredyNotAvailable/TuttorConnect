@@ -10,11 +10,16 @@ class AuthDataSource implements AuthRepository {
 
   @override
   Future<Usuario?> signInWithEmailAndPassword(String email, String password) async {
-    final credential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-    final fb.User? fbUser = credential.user;
-    if (fbUser == null) return null;
+    try {
+      final credential = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+      final fb.User? fbUser = credential.user;
+      if (fbUser == null) return null;
 
-    return await _fetchUsuarioPorUid(fbUser.uid, fbUser);
+      return await _fetchUsuarioPorUid(fbUser.uid, fbUser);
+    } catch (e) {
+      // Puedes manejar el error o rethrow
+      rethrow;
+    }
   }
 
   @override
@@ -24,10 +29,14 @@ class AuthDataSource implements AuthRepository {
 
   @override
   Future<Usuario?> getCurrentUser() async {
-    final fb.User? fbUser = _firebaseAuth.currentUser;
-    if (fbUser == null) return null;
+    try {
+      final fb.User? fbUser = _firebaseAuth.currentUser;
+      if (fbUser == null) return null;
 
-    return await _fetchUsuarioPorUid(fbUser.uid, fbUser);
+      return await _fetchUsuarioPorUid(fbUser.uid, fbUser);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   // Convierte el string a enum RolUsuario
@@ -42,7 +51,7 @@ class AuthDataSource implements AuthRepository {
     }
   }
 
-  // Función privada que busca en la colección 'usuarios' y crea el Usuario
+  // Función privada que busca en Firestore y crea el Usuario
   Future<Usuario?> _fetchUsuarioPorUid(String uid, fb.User fbUser) async {
     final userDoc = await _firestore.collection('usuarios').doc(uid).get();
 

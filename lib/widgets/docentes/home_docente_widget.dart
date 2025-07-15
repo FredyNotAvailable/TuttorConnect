@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/usuario.dart';
+import '../../models/usuario.dart';
 import 'tutorias_widget.dart';
 import 'solicitudes_widget.dart';
 import 'horario_widget.dart';
