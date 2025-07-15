@@ -37,8 +37,6 @@ class AuthDataSource implements AuthRepository {
         return RolUsuario.docente;
       case 'estudiante':
         return RolUsuario.estudiante;
-      case 'administrador':
-        return RolUsuario.administrador;
       default:
         return RolUsuario.estudiante; // valor por defecto
     }
