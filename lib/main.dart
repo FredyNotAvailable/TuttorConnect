@@ -2,20 +2,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tutor_connect/data_sources/carrera_data_source.dart';
-import 'package:tutor_connect/data_sources/horario_disponible_data_source.dart';
 import 'package:tutor_connect/data_sources/malla_curricular_data_source.dart';
 import 'package:tutor_connect/data_sources/materia_data_source.dart';
 import 'package:tutor_connect/data_sources/matricula_data_source.dart';
 import 'package:tutor_connect/data_sources/plan_docente_data_source.dart';
 import 'package:tutor_connect/providers/carrera_provider.dart';
-import 'package:tutor_connect/providers/horario_disponible_provider.dart';
 import 'package:tutor_connect/providers/malla_curricular_provider.dart';
 import 'package:tutor_connect/providers/materia_provider.dart';
 import 'package:tutor_connect/providers/matricula_provider.dart';
 import 'package:tutor_connect/providers/plan_docente_provider.dart';
 import 'package:tutor_connect/repositories/plan_docente_repository.dart';
 import 'package:tutor_connect/services/carrera_service.dart';
-import 'package:tutor_connect/services/horario_disponible_service.dart';
 import 'package:tutor_connect/services/malla_curricular_service.dart';
 import 'package:tutor_connect/services/materia_service.dart';
 import 'package:tutor_connect/services/matricula_service.dart';
@@ -38,7 +35,6 @@ void main() async {
   final matriculaRepository = MatriculaDataSource();
   final carreraRepository = CarreraDataSource();
   final materiaRepository = MateriaDataSource();
-  final horarioDisponibleRepository = HorarioDisponibleDataSource();
   final mallaCurricularRepository = MallaCurricularDataSource();
   final planDocenteRepository = PlanDocenteDataSource();
 
@@ -51,7 +47,6 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MatriculaProvider(MatriculaService(matriculaRepository),),),
         ChangeNotifierProvider(create: (_) => CarreraProvider(CarreraService(carreraRepository),),),
         ChangeNotifierProvider(create: (_) => MateriaProvider(MateriaService(materiaRepository),),),
-        ChangeNotifierProvider(create: (_) => HorarioDisponibleProvider(HorarioDisponibleService(horarioDisponibleRepository),),),
         ChangeNotifierProvider(create: (_) => MallaCurricularProvider(MallaCurricularService(mallaCurricularRepository),),),
         ChangeNotifierProvider(create: (_) => PlanDocenteProvider(PlanDocenteService(planDocenteRepository),),),
       ],
