@@ -4,7 +4,8 @@ import 'package:tutor_connect/models/rol.dart';
 import '../providers/usuario_provider.dart';
 import '../providers/matricula_provider.dart';
 import '../providers/carrera_provider.dart';
-import '../providers/materia_provider.dart'; // Importa el provider de materias
+import '../providers/materia_provider.dart';
+import '../providers/malla_curricular_provider.dart';
 
 class PerfilScreen extends StatefulWidget {
   static const routeName = '/perfil';
@@ -16,8 +17,7 @@ class PerfilScreen extends StatefulWidget {
 }
 
 class _PerfilScreenState extends State<PerfilScreen> {
-  bool _carreraCargada = false;
-  bool _materiasCargadas = false;
+  bool _datosCargados = false;
 
   @override
   void didChangeDependencies() {
@@ -26,24 +26,30 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final usuarioProvider = context.read<UsuarioProvider>();
     final matriculaProvider = context.read<MatriculaProvider>();
     final carreraProvider = context.read<CarreraProvider>();
+    final mallaProvider = context.read<MallaCurricularProvider>();
     final materiaProvider = context.read<MateriaProvider>();
+
     final usuario = usuarioProvider.usuario;
+    final matricula = matriculaProvider.matricula;
 
-    // Solo si el usuario es estudiante, cargar matrícula, carrera y materias
     if (usuario != null && usuario.rol == RolUsuario.estudiante) {
-      final matricula = matriculaProvider.matricula;
-
-      if (!_carreraCargada && matricula != null) {
+      if (!_datosCargados && matricula != null) {
+        // Cargar carrera
         carreraProvider.cargarCarrera(matricula.carreraId);
-        _carreraCargada = true;
+
+        // Primero cargar la malla curricular completa
+        mallaProvider.cargarMalla(matricula.carreraId).then((_) {
+          // Una vez cargada la malla, obtener las materias del ciclo actual
+          final cicloStr = matricula.ciclo.toString();
+          final materiasIds = mallaProvider.malla?.materiasPorCiclo[cicloStr] ?? [];
+
+          // Cargar las materias usando los IDs obtenidos
+          materiaProvider.cargarMateriasPorIds(materiasIds);
+        });
+
+        _datosCargados = true;
       }
 
-      if (!_materiasCargadas && matricula != null) {
-        materiaProvider.cargarMateriasPorIds(matricula.materiasInscritas);
-        _materiasCargadas = true;
-      }
-
-      // Si no hay matrícula cargada, cargarla
       if (!matriculaProvider.cargando && matricula == null) {
         matriculaProvider.cargarMatricula(usuario.id);
       }
@@ -61,7 +67,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final matricula = matriculaProvider.matricula;
     final carrera = carreraProvider.carrera;
 
-    // Manejo carga usuario
     if (usuarioProvider.cargando) {
       return Scaffold(
         appBar: AppBar(title: const Text('Perfil de Usuario')),
@@ -69,7 +74,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
       );
     }
 
-    // Manejo error usuario
     if (usuarioProvider.error != null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Perfil de Usuario')),
@@ -77,7 +81,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
       );
     }
 
-    // Usuario no encontrado
     if (usuario == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Perfil de Usuario')),
@@ -95,7 +98,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Datos Usuario
               const Text('Datos del Usuario',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
@@ -109,12 +111,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
               const SizedBox(height: 8),
               Text('Teléfono: ${usuario.telefono ?? 'No disponible'}',
                   style: const TextStyle(fontSize: 18)),
-
               const SizedBox(height: 24),
 
-              // Mostrar datos académicos SOLO si es estudiante
               if (usuario.rol == RolUsuario.estudiante) ...[
-                const Text('Datos Académicos - Matrícula',
+                const Text('Datos Académicos',
                     style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
@@ -128,12 +128,13 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   const Text('Materias Inscritas:',
                       style: TextStyle(fontSize: 18)),
                   const SizedBox(height: 4),
+
                   if (materiaProvider.cargando)
                     const CircularProgressIndicator()
                   else if (materiaProvider.materias.isEmpty)
                     const Text('No hay materias inscritas',
-                        style:
-                            TextStyle(fontSize: 16, fontStyle: FontStyle.italic))
+                        style: TextStyle(
+                            fontSize: 16, fontStyle: FontStyle.italic))
                   else
                     ListView.builder(
                       shrinkWrap: true,
@@ -146,12 +147,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       },
                     ),
                   const SizedBox(height: 8),
-                  Text('Matrícula Activa: ${matricula.matriculaActiva ? 'Sí' : 'No'}',
-                      style: const TextStyle(fontSize: 18)),
+                  Text(
+                    'Matrícula Activa: ${matricula.matriculaActiva ? 'Sí' : 'No'}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 ] else
                   const Text('No hay matrícula activa',
-                      style:
-                          TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
+                      style: TextStyle(
+                          fontSize: 18, fontStyle: FontStyle.italic)),
               ],
             ],
           ),

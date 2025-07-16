@@ -3,18 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class HorarioDisponible {
   final String id;
   final String docenteId;
+  final String materiaId;  // <-- nuevo campo
   final String diaSemana; // Ej: "lunes", "martes"
   final String horaInicio; // Ej: "14:00"
   final String horaFin; // Ej: "16:00"
-  final bool activo;
+  final bool disponible;  // cambiado de 'activo' a 'disponible'
 
   HorarioDisponible({
     required this.id,
     required this.docenteId,
+    required this.materiaId,  // <-- inicializamos en constructor
     required this.diaSemana,
     required this.horaInicio,
     required this.horaFin,
-    required this.activo,
+    required this.disponible,  // <-- cambiado aquí también
   });
 
   factory HorarioDisponible.fromFirestore(DocumentSnapshot doc) {
@@ -22,10 +24,11 @@ class HorarioDisponible {
     return HorarioDisponible(
       id: doc.id,
       docenteId: data['docenteId'] ?? '',
+      materiaId: data['materiaId'] ?? '',
       diaSemana: data['diaSemana'] ?? '',
       horaInicio: data['horaInicio'] ?? '',
       horaFin: data['horaFin'] ?? '',
-      activo: data['activo'] ?? true,
+      disponible: data['disponible'] ?? true,  // cambio aquí
     );
   }
 
@@ -33,20 +36,22 @@ class HorarioDisponible {
     return HorarioDisponible(
       id: id,
       docenteId: map['docenteId'] ?? '',
+      materiaId: map['materiaId'] ?? '',
       diaSemana: map['diaSemana'] ?? '',
       horaInicio: map['horaInicio'] ?? '',
       horaFin: map['horaFin'] ?? '',
-      activo: map['activo'] ?? true,
+      disponible: map['disponible'] ?? true,  // cambio aquí
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'docenteId': docenteId,
+      'materiaId': materiaId,
       'diaSemana': diaSemana,
       'horaInicio': horaInicio,
       'horaFin': horaFin,
-      'activo': activo,
+      'disponible': disponible,  // cambio aquí
     };
   }
 }

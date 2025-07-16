@@ -64,11 +64,36 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
               authProvider.isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _submit,
-                      child: const Text('Iniciar sesión'),
-                    ),
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: _submit,
+                    child: const Text('Iniciar sesión'),
+                  ),
+              const SizedBox(height: 16),
+              // 🔽 Botones rápidos para testing
+              ElevatedButton(
+                onPressed: () {
+                  context.read<AuthProvider>().login('docente@gmail.com', 'password').then((_) {
+                    final user = context.read<AuthProvider>().user;
+                    if (user != null) {
+                      Navigator.pushReplacementNamed(context, AppRoutes.home);
+                    }
+                  });
+                },
+                child: const Text('Login como Docente'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  context.read<AuthProvider>().login('estudiante@gmail.com', 'password').then((_) {
+                    final user = context.read<AuthProvider>().user;
+                    if (user != null) {
+                      Navigator.pushReplacementNamed(context, AppRoutes.home);
+                    }
+                  });
+                },
+                child: const Text('Login como Estudiante'),
+              ),
             ],
           ),
         ),

@@ -4,16 +4,16 @@ class Matricula {
   final String id;
   final String usuarioId;
   final String carreraId;
+  final String mallaCurricularId; // <-- agregado
   final int ciclo;
-  final List<String> materiasInscritas;
   final bool matriculaActiva;
 
   Matricula({
     required this.id,
     required this.usuarioId,
     required this.carreraId,
+    required this.mallaCurricularId,
     required this.ciclo,
-    required this.materiasInscritas,
     required this.matriculaActiva,
   });
 
@@ -24,8 +24,8 @@ class Matricula {
       id: doc.id,
       usuarioId: data['usuarioId'] ?? '',
       carreraId: data['carreraId'] ?? '',
+      mallaCurricularId: data['mallaCurricularId'] ?? '',
       ciclo: data['ciclo'] ?? 0,
-      materiasInscritas: List<String>.from(data['materiasInscritas'] ?? []),
       matriculaActiva: data['matriculaActiva'] ?? false,
     );
   }
@@ -36,8 +36,8 @@ class Matricula {
       id: id,
       usuarioId: data['usuarioId'] ?? '',
       carreraId: data['carreraId'] ?? '',
+      mallaCurricularId: data['mallaCurricularId'] ?? '',
       ciclo: data['ciclo'] ?? 0,
-      materiasInscritas: List<String>.from(data['materiasInscritas'] ?? []),
       matriculaActiva: data['matriculaActiva'] ?? false,
     );
   }
@@ -47,8 +47,8 @@ class Matricula {
     return {
       'usuarioId': usuarioId,
       'carreraId': carreraId,
+      'mallaCurricularId': mallaCurricularId,
       'ciclo': ciclo,
-      'materiasInscritas': materiasInscritas,
       'matriculaActiva': matriculaActiva,
     };
   }
