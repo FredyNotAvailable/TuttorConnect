@@ -11,7 +11,6 @@ import 'package:tutor_connect/providers/malla_curricular_provider.dart';
 import 'package:tutor_connect/providers/materia_provider.dart';
 import 'package:tutor_connect/providers/matricula_provider.dart';
 import 'package:tutor_connect/providers/plan_docente_provider.dart';
-import 'package:tutor_connect/repositories/plan_docente_repository.dart';
 import 'package:tutor_connect/services/carrera_service.dart';
 import 'package:tutor_connect/services/malla_curricular_service.dart';
 import 'package:tutor_connect/services/materia_service.dart';
