@@ -14,6 +14,10 @@ class UsuarioProvider extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  // Cache privado de usuarios cargados
+  List<Usuario> _usuariosCache = [];
+  List<Usuario> get usuariosCache => _usuariosCache;
+
   UsuarioProvider(this._usuarioService);
 
   Future<void> cargarUsuario(String id) async {
@@ -45,5 +49,28 @@ class UsuarioProvider extends ChangeNotifier {
 
     _cargando = false;
     notifyListeners();
+  }
+
+  Future<List<Usuario>> cargarUsuariosPorIds(List<String> ids) async {
+    _cargando = true;
+    _error = null;
+    notifyListeners();
+
+    List<Usuario> usuarios = [];
+    try {
+      for (var id in ids) {
+        final usuario = await _usuarioService.obtenerUsuarioPorId(id);
+        if (usuario != null) {
+          usuarios.add(usuario);
+        }
+      }
+      _usuariosCache = usuarios; // Actualizo el cache con los usuarios cargados
+    } catch (e) {
+      _error = 'Error al cargar usuarios: $e';
+    }
+
+    _cargando = false;
+    notifyListeners();
+    return usuarios;
   }
 }

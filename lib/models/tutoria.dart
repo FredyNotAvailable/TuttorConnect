@@ -11,6 +11,7 @@ class Tutoria {
   final String tema;
   final List<String> estudiantesIds;
   final String estado; // 'activa', 'finalizada', 'cancelada'
+  final DateTime createdAt; // Nuevo campo
 
   Tutoria({
     required this.id,
@@ -23,6 +24,7 @@ class Tutoria {
     required this.tema,
     required this.estudiantesIds,
     required this.estado,
+    required this.createdAt,
   });
 
   factory Tutoria.fromMap(Map<String, dynamic> map, String id) {
@@ -37,6 +39,9 @@ class Tutoria {
       tema: map['tema'] ?? '',
       estudiantesIds: List<String>.from(map['estudiantesIds'] ?? []),
       estado: map['estado'] ?? 'activa',
+      createdAt: map['createdAt'] != null
+          ? (map['createdAt'] as Timestamp).toDate()
+          : DateTime.now(), // Por si no está en Firestore, asigna ahora
     );
   }
 
@@ -56,6 +61,7 @@ class Tutoria {
       'tema': tema,
       'estudiantesIds': estudiantesIds,
       'estado': estado,
+      'createdAt': Timestamp.fromDate(createdAt), // Guardar como Timestamp
     };
   }
 }

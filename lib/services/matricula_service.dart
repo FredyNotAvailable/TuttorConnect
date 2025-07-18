@@ -9,4 +9,9 @@ class MatriculaService {
   Future<Matricula?> cargarMatriculaPorUsuario(String usuarioId) {
     return _repository.obtenerMatriculaPorUsuarioId(usuarioId);
   }
+
+  // Nuevo método para obtener estudiantes por materia y ciclo
+  Future<List<String>> obtenerEstudiantesPorMateriaYCiclo(String materiaId, int ciclo) {
+    return _repository.obtenerEstudiantesPorMateriaYCiclo(materiaId, ciclo);
+  }
 }

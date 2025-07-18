@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../models/usuario.dart';
-import 'tutorias_widget.dart';
-import 'solicitudes_widget.dart';
+import 'package:tutor_connect/models/usuario.dart';
+
+import 'tutorias_docente_widget.dart';
+import 'configuracion_widget.dart'; // importa el widget
 
 class HomeDocenteWidget extends StatefulWidget {
   final Usuario user;
@@ -20,8 +21,8 @@ class _HomeDocenteState extends State<HomeDocenteWidget> {
   void initState() {
     super.initState();
     _pages = [
-      TutoriasWidget(user: widget.user),
-      SolicitudesWidget(user: widget.user),
+      TutoriasDocenteWidget(user: widget.user),
+      const ConfiguracionWidget(),  // aquí
     ];
   }
 
@@ -33,7 +34,7 @@ class _HomeDocenteState extends State<HomeDocenteWidget> {
         currentIndex: _selectedIndex,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Tutorías'),
-          BottomNavigationBarItem(icon: Icon(Icons.inbox), label: 'Solicitudes'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Configuración'),
         ],
         onTap: (index) => setState(() => _selectedIndex = index),
       ),

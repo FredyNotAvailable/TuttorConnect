@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tutor_connect/widgets/estudiantes/tutorias_estudiante_widget.dart';
 import '../../models/usuario.dart';
-import 'solicitar_tutoria_widget.dart';
-import 'historial_tutorias_widget.dart';
-import 'ver_docentes_widget.dart';
+import 'solicitudes_widget.dart';  // Importa el widget de notificaciones
 
 class HomeEstudianteWidget extends StatefulWidget {
   final Usuario user;
@@ -22,9 +21,8 @@ class _HomeEstudianteWidgetState extends State<HomeEstudianteWidget> {
   void initState() {
     super.initState();
     _pages = [
-      SolicitarTutoriaWidget(user: widget.user),
-      HistorialTutoriasWidget(user: widget.user),
-      VerDocentesWidget(user: widget.user),
+      TutoriasEstudianteWidget(user: widget.user),        // Pantalla de tutorías
+      SolicitudesWidget(user: widget.user),  // Pantalla de notificaciones
     ];
   }
 
@@ -35,9 +33,8 @@ class _HomeEstudianteWidgetState extends State<HomeEstudianteWidget> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'Solicitar'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Historial'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Docentes'),
+          BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Tutorías'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Solicitudes'),
         ],
         onTap: (index) => setState(() => _selectedIndex = index),
       ),

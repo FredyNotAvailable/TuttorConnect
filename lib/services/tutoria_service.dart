@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tutor_connect/models/tutoria.dart';
 import 'package:tutor_connect/repositories/tutoria_repository.dart';
 
@@ -23,8 +24,25 @@ class TutoriaService {
   }
 
   Future<void> crearTutoria(Tutoria tutoria) {
-    // Aquí podrías añadir validaciones o reglas antes de crear
     return _repository.crearTutoria(tutoria);
+  }
+
+  /// Crea la tutoría y devuelve una instancia con el ID asignado por Firestore.
+  Future<Tutoria> crearTutoriaYRetornar(Tutoria tutoria) async {
+    final docRef = await (_repository as dynamic).crearTutoriaYRetornarDocumento(tutoria);
+    return Tutoria(
+      id: docRef.id,
+      docenteId: tutoria.docenteId,
+      materiaId: tutoria.materiaId,
+      aulaId: tutoria.aulaId,
+      fecha: tutoria.fecha,
+      horaInicio: tutoria.horaInicio,
+      horaFin: tutoria.horaFin,
+      tema: tutoria.tema,
+      estudiantesIds: tutoria.estudiantesIds,
+      estado: tutoria.estado,
+      createdAt: tutoria.createdAt,
+    );
   }
 
   Future<void> actualizarTutoria(Tutoria tutoria) {
@@ -50,5 +68,14 @@ class TutoriaService {
 
   Future<List<Tutoria>> buscarTutoriasPorTema(String tema) {
     return _repository.buscarTutoriasPorTema(tema);
+  }
+
+  Future<List<Tutoria>> obtenerTutoriasPorIds(List<String> ids) {
+    return _repository.obtenerTutoriasPorIds(ids);
+  }
+
+  /// Agrega un estudiante a la lista de estudiantes confirmados de una tutoría.
+  Future<void> agregarEstudianteATutoria(String tutoriaId, String estudianteId) {
+    return _repository.agregarEstudianteATutoria(tutoriaId, estudianteId);
   }
 }

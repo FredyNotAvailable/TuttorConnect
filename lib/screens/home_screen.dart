@@ -67,11 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('Hola, ${user.nombre ?? ''} 👋'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
-            tooltip: 'Notificaciones',
-            onPressed: () => _goToNotificaciones(context),
-          ),
-          IconButton(
             icon: const Icon(Icons.account_circle),
             tooltip: 'Perfil',
             onPressed: () => _goToPerfil(context),

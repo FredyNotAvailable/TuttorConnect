@@ -5,6 +5,7 @@ import 'package:tutor_connect/repositories/solicitud_tutoria_repository.dart';
 class SolicitudTutoriaDataSource implements SolicitudTutoriaRepository {
   final CollectionReference _collection =
       FirebaseFirestore.instance.collection('solicitudes_tutoria');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Future<List<SolicitudTutoria>> obtenerSolicitudesPorTutoria(String tutoriaId) async {
@@ -35,11 +36,40 @@ class SolicitudTutoriaDataSource implements SolicitudTutoriaRepository {
 
   @override
   Future<void> crearSolicitud(SolicitudTutoria solicitud) async {
-    await _collection.doc(solicitud.id).set(solicitud.toMap());
+    final data = solicitud.toMap();
+    // Si no tiene createdAt, asignar la fecha actual
+    if (data['createdAt'] == null) {
+      data['createdAt'] = Timestamp.now();
+    }
+    await _collection.doc(solicitud.id).set(data);
   }
 
   @override
   Future<void> actualizarSolicitud(SolicitudTutoria solicitud) async {
     await _collection.doc(solicitud.id).update(solicitud.toMap());
+  }
+
+  @override
+  Future<void> crearSolicitudes(List<SolicitudTutoria> solicitudes) async {
+    final batch = _firestore.batch();
+
+    for (final solicitud in solicitudes) {
+      final docRef = _collection.doc(solicitud.id);
+      final data = solicitud.toMap();
+      if (data['createdAt'] == null) {
+        data['createdAt'] = Timestamp.now();
+      }
+      batch.set(docRef, data);
+    }
+
+    await batch.commit();
+  }
+
+  @override
+  Future<void> agregarEstudianteATutoria(String tutoriaId, String estudianteId) async {
+    final docRef = FirebaseFirestore.instance.collection('tutorias').doc(tutoriaId);
+    await docRef.update({
+      'estudiantesIds': FieldValue.arrayUnion([estudianteId])
+    });
   }
 }

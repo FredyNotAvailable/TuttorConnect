@@ -8,6 +8,9 @@ class MatriculaProvider extends ChangeNotifier {
   Matricula? _matricula;
   Matricula? get matricula => _matricula;
 
+  List<String> _estudiantesIds = [];
+  List<String> get estudiantesIds => _estudiantesIds;
+
   bool _cargando = false;
   bool get cargando => _cargando;
 
@@ -17,9 +20,8 @@ class MatriculaProvider extends ChangeNotifier {
   MatriculaProvider(this._service);
 
   Future<void> cargarMatricula(String usuarioId) async {
-    _cargando = true;
+    _setLoading(true);
     _error = null;
-    notifyListeners();
 
     try {
       _matricula = await _service.cargarMatriculaPorUsuario(usuarioId);
@@ -27,7 +29,30 @@ class MatriculaProvider extends ChangeNotifier {
       _error = 'Error al cargar matrícula: $e';
     }
 
+    _setLoading(false);
+  }
+
+  Future<void> cargarEstudiantesPorMateriaYCiclo(String materiaId, int ciclo) async {
+    _cargando = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _estudiantesIds = await _service.obtenerEstudiantesPorMateriaYCiclo(materiaId, ciclo);
+      print('MatriculaProvider - estudiantesIds cargados: $_estudiantesIds');
+    } catch (e) {
+      _error = 'Error al cargar estudiantes: $e';
+      print('Error en MatriculaProvider.cargarEstudiantesPorMateriaYCiclo: $e');
+      _estudiantesIds = [];
+    }
+
     _cargando = false;
+    notifyListeners();
+  }
+
+
+  void _setLoading(bool value) {
+    _cargando = value;
     notifyListeners();
   }
 }

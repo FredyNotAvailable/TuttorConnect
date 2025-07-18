@@ -22,4 +22,16 @@ class AulaProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  Future<Aula?> obtenerAulaPorId(String id) async {
+  try {
+    if (_aulas.isEmpty) {
+      await cargarAulas();
+    }
+    return _aulas.firstWhere((aula) => aula.id == id);
+  } catch (_) {
+    return null;
+  }
+}
+
 }

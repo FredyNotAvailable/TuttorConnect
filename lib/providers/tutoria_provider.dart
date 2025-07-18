@@ -33,15 +33,17 @@ class TutoriaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> crearTutoria(Tutoria tutoria) async {
+  Future<Tutoria> crearTutoria(Tutoria tutoria) async {
     _isLoading = true;
     notifyListeners();
 
-    await _service.crearTutoria(tutoria);
-    // Puedes recargar la lista o actualizar el estado aquí si quieres
+    final tutoriaCreada = await _service.crearTutoriaYRetornar(tutoria);
+    _tutorias.add(tutoriaCreada);
 
     _isLoading = false;
     notifyListeners();
+
+    return tutoriaCreada;
   }
 
   Future<void> cancelarTutoria(String id) async {
@@ -49,9 +51,48 @@ class TutoriaProvider extends ChangeNotifier {
     notifyListeners();
 
     await _service.cancelarTutoria(id);
-    // Actualizar lista o estado si es necesario
+    // Opcional: eliminarla localmente o recargar
 
     _isLoading = false;
     notifyListeners();
   }
+
+  Future<void> cargarTutoriasPorIds(List<String> ids) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _tutorias = await _service.obtenerTutoriasPorIds(ids);
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// ✅ Nuevo método: agregar estudiante a la tutoría
+  Future<void> agregarEstudianteATutoria(String tutoriaId, String estudianteId) async {
+    await _service.agregarEstudianteATutoria(tutoriaId, estudianteId);
+
+    // Actualizar en la lista local si está cargada
+    final index = _tutorias.indexWhere((t) => t.id == tutoriaId);
+    if (index != -1) {
+      final tutoria = _tutorias[index];
+      if (!tutoria.estudiantesIds.contains(estudianteId)) {
+        _tutorias[index] = Tutoria(
+          id: tutoria.id,
+          docenteId: tutoria.docenteId,
+          materiaId: tutoria.materiaId,
+          aulaId: tutoria.aulaId,
+          fecha: tutoria.fecha,
+          horaInicio: tutoria.horaInicio,
+          horaFin: tutoria.horaFin,
+          tema: tutoria.tema,
+          estudiantesIds: [...tutoria.estudiantesIds, estudianteId],
+          estado: tutoria.estado,
+          createdAt: tutoria.createdAt,
+        );
+        notifyListeners();
+      }
+    }
+  }
+
+  
 }

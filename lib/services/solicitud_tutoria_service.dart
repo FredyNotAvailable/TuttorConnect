@@ -25,4 +25,8 @@ class SolicitudTutoriaService {
   Future<void> actualizarSolicitud(SolicitudTutoria solicitud) {
     return _repository.actualizarSolicitud(solicitud);
   }
+
+  Future<void> crearSolicitudes(List<SolicitudTutoria> solicitudes) {
+    return _repository.crearSolicitudes(solicitudes);
+  }
 }
