@@ -22,6 +22,7 @@ class SolicitudesWidget extends StatefulWidget {
 
 class _SolicitudesWidgetState extends State<SolicitudesWidget> {
   bool _cargando = true;
+  String? _materiaFiltro; // NUEVO
 
   @override
   void initState() {
@@ -58,9 +59,6 @@ class _SolicitudesWidgetState extends State<SolicitudesWidget> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Notificaciones para ${widget.user.nombre ?? 'usuario'}'),
-      ),
       body: Consumer4<SolicitudTutoriaProvider, TutoriaProvider, UsuarioProvider, MateriaProvider>(
         builder: (context, solicitudProv, tutoriaProv, usuarioProv, materiaProv, _) {
           final solicitudes = solicitudProv.solicitudes;
@@ -72,139 +70,161 @@ class _SolicitudesWidgetState extends State<SolicitudesWidget> {
             return const Center(child: Text('No tienes solicitudes de tutoría.'));
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: solicitudes.length,
-            itemBuilder: (context, index) {
-              final solicitud = solicitudes[index];
-              final tutoria = tutorias.firstWhere(
-                (t) => t.id == solicitud.tutoriaId,
-                orElse: () => Tutoria(
-                  id: '',
-                  docenteId: '',
-                  materiaId: '',
-                  aulaId: '',
-                  fecha: DateTime.now(),
-                  horaInicio: '',
-                  horaFin: '',
-                  tema: '',
-                  estudiantesIds: [],
-                  estado: '',
-                  createdAt: DateTime.now(),
+          // FILTRO por materia
+          final materiasDisponibles = materiaProv.materias;
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: DropdownButtonFormField<String>(
+                  value: _materiaFiltro,
+                  isExpanded: true,
+                  hint: const Text('Filtrar por materia'),
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text('Todas')),
+                    ...materiasDisponibles.map((m) => DropdownMenuItem(
+                          value: m.id,
+                          child: Text(m.nombre),
+                        )),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _materiaFiltro = value;
+                    });
+                  },
                 ),
-              );
-
-              final docente = docentesMap[tutoria.docenteId];
-              final materia = materiasMap[tutoria.materiaId];
-
-              final nombreDocente = docente?.nombre ?? 'Desconocido';
-              final rolDocente = docente?.rol.name ?? 'Docente';
-              final nombreMateria = materia?.nombre ?? 'Materia desconocida';
-
-              final fechaRecibida = solicitud.fechaRespuesta ?? solicitud.createdAt;
-
-              final bool estaPendiente = solicitud.estado == 'pendiente';
-
-              return Card(
-                elevation: 3,
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Invitación a la tutoría',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: solicitudes.length,
+                  itemBuilder: (context, index) {
+                    final solicitud = solicitudes[index];
+                    final tutoria = tutorias.firstWhere(
+                      (t) => t.id == solicitud.tutoriaId,
+                      orElse: () => Tutoria(
+                        id: '',
+                        docenteId: '',
+                        materiaId: '',
+                        aulaId: '',
+                        fecha: DateTime.now(),
+                        horaInicio: '',
+                        horaFin: '',
+                        tema: '',
+                        estudiantesIds: [],
+                        estado: '',
+                        createdAt: DateTime.now(),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'El $rolDocente $nombreDocente te ha invitado a la tutoría "$nombreMateria".',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      if (fechaRecibida != null)
-                        Text(
-                          'Recibida: ${fechaRecibida.day}/${fechaRecibida.month}/${fechaRecibida.year} '
-                          '${fechaRecibida.hour.toString().padLeft(2, '0')}:${fechaRecibida.minute.toString().padLeft(2, '0')}',
-                          style: const TextStyle(color: Colors.grey),
-                        )
-                      else
-                        const SizedBox.shrink(),
+                    );
 
-                      const SizedBox(height: 12),
-                      if (estaPendiente)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                    // APLICAR FILTRO DE MATERIA
+                    if (_materiaFiltro != null && tutoria.materiaId != _materiaFiltro) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final docente = docentesMap[tutoria.docenteId];
+                    final materia = materiasMap[tutoria.materiaId];
+
+                    final nombreDocente = docente?.nombre ?? 'Desconocido';
+                    final rolDocente = docente?.rol.name ?? 'Docente';
+                    final nombreMateria = materia?.nombre ?? 'Materia desconocida';
+
+                    final fechaRecibida = solicitud.fechaRespuesta ?? solicitud.createdAt;
+                    final bool estaPendiente = solicitud.estado == 'pendiente';
+
+                    return Card(
+                      elevation: 3,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            TextButton(
-                              onPressed: () async {
-                                try {
-                                  final nueva = solicitud.copyWith(
-                                    estado: 'rechazado',
-                                    fechaRespuesta: DateTime.now(),
-                                  );
-                                  await solicitudProv.actualizarSolicitud(nueva);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Solicitud rechazada')),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Error al rechazar solicitud: $e')),
-                                  );
-                                }
-                              },
-                              child: const Text(
-                                'Rechazar',
-                                style: TextStyle(color: Colors.red),
+                            const Text(
+                              'Invitación a la tutoría',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'El $rolDocente $nombreDocente te ha invitado a la tutoría "$nombreMateria".',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 8),
+                            if (fechaRecibida != null)
+                              Text(
+                                'Recibida: ${fechaRecibida.day}/${fechaRecibida.month}/${fechaRecibida.year} '
+                                '${fechaRecibida.hour.toString().padLeft(2, '0')}:${fechaRecibida.minute.toString().padLeft(2, '0')}',
+                                style: const TextStyle(color: Colors.grey),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed: () async {
-                                try {
-                                  final nueva = solicitud.copyWith(
-                                    estado: 'aceptado',
-                                    fechaRespuesta: DateTime.now(),
-                                  );
-
-                                  // 1. Actualiza solicitud
-                                  await solicitudProv.actualizarSolicitud(nueva);
-
-                                  // 2. Agrega estudiante a tutoría
-                                  await tutoriaProv.agregarEstudianteATutoria(
-                                    solicitud.tutoriaId,
-                                    solicitud.estudianteId,
-                                  );
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Solicitud aceptada')),
-                                  );
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Error al aceptar solicitud: $e')),
-                                  );
-                                }
-                              },
-                              child: const Text('Aceptar'),
-                            ),
+                            const SizedBox(height: 12),
+                            if (estaPendiente)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      try {
+                                        final nueva = solicitud.copyWith(
+                                          estado: 'rechazado',
+                                          fechaRespuesta: DateTime.now(),
+                                        );
+                                        await solicitudProv.actualizarSolicitud(nueva);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Solicitud rechazada')),
+                                        );
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error al rechazar solicitud: $e')),
+                                        );
+                                      }
+                                    },
+                                    child: const Text('Rechazar', style: TextStyle(color: Colors.red)),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      try {
+                                        final nueva = solicitud.copyWith(
+                                          estado: 'aceptado',
+                                          fechaRespuesta: DateTime.now(),
+                                        );
+                                        await solicitudProv.actualizarSolicitud(nueva);
+                                        await tutoriaProv.agregarEstudianteATutoria(
+                                          solicitud.tutoriaId,
+                                          solicitud.estudianteId,
+                                        );
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Solicitud aceptada')),
+                                        );
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error al aceptar solicitud: $e')),
+                                        );
+                                      }
+                                    },
+                                    child: const Text('Aceptar'),
+                                  ),
+                                ],
+                              )
+                            else
+                              Text(
+                                'Estado: ${solicitud.estado[0].toUpperCase()}${solicitud.estado.substring(1)}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                              ),
                           ],
-                        )
-                      else
-                        Text(
-                          'Estado: ${solicitud.estado[0].toUpperCase()}${solicitud.estado.substring(1)}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
                         ),
-                    ],
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),

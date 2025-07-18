@@ -151,7 +151,7 @@ class _DetalleTutoriaScreenState extends State<DetalleTutoriaScreen> {
                   _infoRow('Aula', _aula?.nombre ?? 'No disponible'),
                   _infoRow('Fecha', widget.tutoria.fecha.toLocal().toString().split(' ')[0]),
                   _infoRow('Hora', '${widget.tutoria.horaInicio} - ${widget.tutoria.horaFin}'),
-                  _infoRow('Estado', widget.tutoria.estado),
+                  // _infoRow('Estado', widget.tutoria.estado),
 
                   const Divider(height: 32),
 

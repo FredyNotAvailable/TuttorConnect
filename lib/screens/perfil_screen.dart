@@ -34,16 +34,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
     if (usuario != null && usuario.rol == RolUsuario.estudiante) {
       if (!_datosCargados && matricula != null) {
-        // Cargar carrera
         carreraProvider.cargarCarrera(matricula.carreraId);
 
-        // Primero cargar la malla curricular completa
         mallaProvider.cargarMalla(matricula.carreraId).then((_) {
-          // Una vez cargada la malla, obtener las materias del ciclo actual
           final cicloStr = matricula.ciclo.toString();
           final materiasIds = mallaProvider.malla?.materiasPorCiclo[cicloStr] ?? [];
-
-          // Cargar las materias usando los IDs obtenidos
           materiaProvider.cargarMateriasPorIds(materiasIds);
         });
 
@@ -68,9 +63,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final carrera = carreraProvider.carrera;
 
     if (usuarioProvider.cargando) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Perfil de Usuario')),
-        body: const Center(child: CircularProgressIndicator()),
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -91,74 +85,134 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final rolTexto = usuario.rol.toString().split('.').last;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Perfil de Usuario')),
-      body: Padding(
+      appBar: AppBar(
+        title: const Text('Mi Perfil'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
+      ),
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Datos del Usuario',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Text('Nombre: ${usuario.nombre ?? 'No disponible'}',
-                  style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 8),
-              Text('Correo: ${usuario.correo}',
-                  style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 8),
-              Text('Rol: $rolTexto', style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 8),
-              Text('Teléfono: ${usuario.telefono ?? 'No disponible'}',
-                  style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 24),
-
-              if (usuario.rol == RolUsuario.estudiante) ...[
-                const Text('Datos Académicos',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                if (matricula != null) ...[
-                  Text('Carrera: ${carrera?.nombre ?? 'Desconocida'}',
-                      style: const TextStyle(fontSize: 18)),
-                  const SizedBox(height: 8),
-                  Text('Ciclo: ${matricula.ciclo}',
-                      style: const TextStyle(fontSize: 18)),
-                  const SizedBox(height: 8),
-                  const Text('Materias Inscritas:',
-                      style: TextStyle(fontSize: 18)),
-                  const SizedBox(height: 4),
-
-                  if (materiaProvider.cargando)
-                    const CircularProgressIndicator()
-                  else if (materiaProvider.materias.isEmpty)
-                    const Text('No hay materias inscritas',
-                        style: TextStyle(
-                            fontSize: 16, fontStyle: FontStyle.italic))
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: materiaProvider.materias.length,
-                      itemBuilder: (context, index) {
-                        final materia = materiaProvider.materias[index];
-                        return Text('- ${materia.nombre}',
-                            style: const TextStyle(fontSize: 16));
-                      },
-                    ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Matrícula Activa: ${matricula.matriculaActiva ? 'Sí' : 'No'}',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ] else
-                  const Text('No hay matrícula activa',
-                      style: TextStyle(
-                          fontSize: 18, fontStyle: FontStyle.italic)),
-              ],
-            ],
+        children: [
+          const Text(
+            'Información Personal',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
-        ),
+          const SizedBox(height: 8),
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.person),
+                    title: Text(usuario.nombre ?? 'No disponible'),
+                    subtitle: const Text('Nombre completo'),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.email),
+                    title: Text(usuario.correo),
+                    subtitle: const Text('Correo electrónico'),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.shield),
+                    title: Text(rolTexto.toUpperCase()),
+                    subtitle: const Text('Rol asignado'),
+                  ),
+                  if (usuario.telefono != null) ...[
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(Icons.phone),
+                      title: Text(usuario.telefono!),
+                      subtitle: const Text('Teléfono'),
+                    ),
+                  ]
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (usuario.rol == RolUsuario.estudiante) ...[
+            const Text(
+              'Información Académica',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                child: Column(
+                  children: [
+                    if (matricula != null) ...[
+                      ListTile(
+                        leading: const Icon(Icons.school),
+                        title: Text(carrera?.nombre ?? 'Desconocida'),
+                        subtitle: const Text('Carrera'),
+                      ),
+                      const Divider(),
+                      ListTile(
+                        leading: const Icon(Icons.timeline),
+                        title: Text('Ciclo ${matricula.ciclo}'),
+                        subtitle: const Text('Nivel actual'),
+                      ),
+                      const Divider(),
+                      ListTile(
+                        leading: const Icon(Icons.check_circle_outline),
+                        title: Text(matricula.matriculaActiva ? 'Sí' : 'No'),
+                        subtitle: const Text('Matrícula activa'),
+                      ),
+                      const Divider(),
+                      ListTile(
+                        leading: const Icon(Icons.book),
+                        title: const Text('Materias Inscritas'),
+                        subtitle: materiaProvider.cargando
+                            ? const Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: CircularProgressIndicator(),
+                              )
+                            : materiaProvider.materias.isEmpty
+                                ? const Padding(
+                                    padding: EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      'No hay materias inscritas',
+                                      style: TextStyle(fontStyle: FontStyle.italic),
+                                    ),
+                                  )
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: materiaProvider.materias
+                                        .map((m) => Padding(
+                                              padding: const EdgeInsets.only(top: 4),
+                                              child: Text('• ${m.nombre}',
+                                                  style: const TextStyle(fontSize: 16)),
+                                            ))
+                                        .toList(),
+                                  ),
+                      ),
+                    ] else
+                      const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Text(
+                          'No hay matrícula activa',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
